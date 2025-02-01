@@ -85,7 +85,7 @@ func (h *PlayerHandler) SetPlotPositions(positions []Position) error {
 
 // HandleMove shows information on the plot that the player enters.
 func (h *PlayerHandler) HandleMove(ctx *player.Context, pos mgl64.Vec3, _ cube.Rotation) {
-	p := ctx.V()
+	p := ctx.Val()
 	newPos, oldPos := cube.PosFromVec3(pos), cube.PosFromVec3(p.Position())
 	plotPos := PosFromBlockPos(newPos, h.settings)
 	previous := PosFromBlockPos(oldPos, h.settings)
@@ -104,7 +104,7 @@ func (h *PlayerHandler) HandleMove(ctx *player.Context, pos mgl64.Vec3, _ cube.R
 
 // HandleBlockBreak prevents block breaking outside of the player's plots.
 func (h *PlayerHandler) HandleBlockBreak(ctx *player.Context, pos cube.Pos, _ *[]item.Stack, _ *int) {
-	p := ctx.V()
+	p := ctx.Val()
 	if !h.canEdit(pos) {
 		p.Tx().PlaySound(pos.Vec3Centre(), sound.Deny{})
 		p.Tx().AddParticle(pos.Vec3Centre(), particle.BlockForceField{})
@@ -114,7 +114,7 @@ func (h *PlayerHandler) HandleBlockBreak(ctx *player.Context, pos cube.Pos, _ *[
 
 // HandleBlockPlace prevents block placing outside of the player's plots.
 func (h *PlayerHandler) HandleBlockPlace(ctx *player.Context, pos cube.Pos, _ world.Block) {
-	p := ctx.V()
+	p := ctx.Val()
 	if !h.canEdit(pos) {
 		p.Tx().PlaySound(pos.Vec3Centre(), sound.Deny{})
 		p.Tx().AddParticle(pos.Vec3Centre(), particle.BlockForceField{})
@@ -124,7 +124,7 @@ func (h *PlayerHandler) HandleBlockPlace(ctx *player.Context, pos cube.Pos, _ wo
 
 // HandleItemUseOnBlock prevents using items on blocks outside of the player's plots.
 func (h *PlayerHandler) HandleItemUseOnBlock(ctx *player.Context, pos cube.Pos, face cube.Face, _ mgl64.Vec3) {
-	p := ctx.V()
+	p := ctx.Val()
 	held, _ := p.HeldItems()
 	if _, ok := held.Item().(world.Block); !ok && (!h.canEdit(pos) || !h.canEdit(pos.Side(face))) {
 		// For blocks, we don't return here but at HandleBlockPlace.
@@ -148,6 +148,6 @@ func (h *PlayerHandler) canEdit(pos cube.Pos) bool {
 }
 
 // HandleQuit removes the PlayerHandler from the Handlers map.
-func (h *PlayerHandler) HandleQuit() {
+func (h *PlayerHandler) HandleQuit(*player.Player) {
 	handlers.Delete(h.id)
 }
